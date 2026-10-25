@@ -75,7 +75,6 @@
   button:disabled{opacity:.6;cursor:wait}
 
   .status{display:flex;justify-content:space-between;margin-top:14px;font-size:11.5px;color:var(--green-dim)}
-  .hint{margin-top:12px;font-size:12px;color:var(--amber);min-height:1em;line-height:1.5}
 
   /* экран победы */
   .win{position:fixed;inset:0;z-index:5;display:none;align-items:center;justify-content:center;
@@ -119,7 +118,6 @@
       </form>
 
       <div class="status"><span id="tries">Попыток: 0</span><span id="state">Ожидание ввода</span></div>
-      <div class="hint" id="hint"></div>
     </div>
   </div>
 </div>
@@ -132,6 +130,7 @@
     <!-- Замените на свои контакты: -->
     <p><a href="#">Ссылка на анкету / контакты</a></p>
     <p class="stat" id="winStat"></p>
+    <button type="button" id="again">НАЧАТЬ ЗАНОВО</button>
   </div>
 </div>
 
@@ -153,12 +152,6 @@ const ANSWER_HASHES = [
   "25222a8f7b8abf4808a084ae5bd55edc25256e401906b920f66310fd7f06c068",
   "37a8eec1ce19687d132fe29051dca629d164e2c4958ba141d5f4133a33f0688f",
 ];
-// Подсказки: после какого числа неудачных попыток что показать.
-const HINTS = {
-  3:  "Подсказка: ответ имеет формат flag{...}",
-  6:  "Подсказка: подумай, куда мы тебя приглашаем.",
-  10: "Подсказка: слова внутри фигурных скобок разделены нижним подчёркиванием.",
-};
 // Приводить ли ввод к нижнему регистру перед проверкой.
 const CASE_INSENSITIVE = true;
 /* ==================================================== */
@@ -219,14 +212,25 @@ $("form").addEventListener("submit", async e => {
     $("state").textContent = "Успех";
     setLog("Код принят. Доступ открыт.", "ok");
     $("winStat").textContent = "Попыток потребовалось: " + tries;
+    // обнуляем счётчик после успешного ввода
+    tries = 0;
+    try { localStorage.removeItem(KEY); } catch(e) {}
+    $("tries").textContent = "Попыток: 0";
     setTimeout(() => $("win").classList.add("show"), 500);
   } else {
     $("state").textContent = "Неверный код";
     setLog("Неверный код. Попробуй ещё раз.", "err");
     term.classList.remove("shake"); void term.offsetWidth; term.classList.add("shake");
-    if(HINTS[tries]) $("hint").textContent = HINTS[tries];
     input.select();
   }
+});
+
+$("again").addEventListener("click", () => {
+  $("win").classList.remove("show");
+  input.value = "";
+  $("state").textContent = "Ожидание ввода";
+  setLog("Требуется код доступа", "warn");
+  input.focus();
 });
 
 /* фон «цифровой дождь» */
