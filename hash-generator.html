@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Генератор хэша</title>
+<style>
+  body{background:#020602;color:#c4ffd9;font-family:Consolas,"Courier New",monospace;
+    display:flex;justify-content:center;padding:32px 16px}
+  .box{max-width:560px;width:100%;border:1px solid #00b347;padding:20px}
+  h1{font-size:18px;color:#00ff66;margin-bottom:12px}
+  p{font-size:13px;line-height:1.5;color:#00b347;margin:0 0 12px}
+  input{width:100%;box-sizing:border-box;padding:12px;font:16px monospace;background:#000;
+    color:#00ff66;border:1px solid #0b3a1c;outline:0}
+  label{display:flex;gap:8px;align-items:center;font-size:13px;margin:10px 0}
+  pre{background:#000;border:1px solid #0b3a1c;padding:12px;white-space:pre-wrap;word-break:break-all;
+    color:#00ff66;font-size:13px;min-height:1em}
+  button{padding:10px 16px;font:14px monospace;background:#00ff66;color:#020602;border:0;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Генератор хэша ответа</h1>
+  <p>Введите правильный ответ. Скопируйте строку ниже в массив ANSWER_HASHES в index.html.
+     Этот файл на GitHub загружать не нужно.</p>
+  <input id="v" placeholder="flag{...}" autocomplete="off">
+  <label><input type="checkbox" id="lc" checked style="width:auto"> Без учёта регистра (как CASE_INSENSITIVE в index.html)</label>
+  <pre id="out"></pre>
+  <button id="copy">Копировать</button>
+</div>
+<script>
+const v=document.getElementById("v"),lc=document.getElementById("lc"),out=document.getElementById("out");
+async function upd(){
+  let s=v.value.trim(); if(lc.checked) s=s.toLowerCase();
+  if(!s){out.textContent="";return;}
+  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+  out.textContent='"'+[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")+'",';
+}
+v.oninput=upd; lc.onchange=upd;
+document.getElementById("copy").onclick=()=>navigator.clipboard.writeText(out.textContent);
+</script>
+</body>
+</html>
